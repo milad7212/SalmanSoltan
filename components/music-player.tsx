@@ -41,12 +41,12 @@ const songs = [
   },
   {
     id: 3,
-    title: "موخام",
+    title: "محکم",
     duration: "3:35",
     category: "غمگین",
-    coverImage: "/Mokham.jpg",
-    audioUrl: "/audio/Mokahm.mp3",
-    lyrics: `موخام..`,
+    coverImage: "/Mohkam.jpg",
+    audioUrl: "/audio/Mohkam.mp3",
+    lyrics: `محکم..`,
   },
   {
     id: 4,
@@ -431,7 +431,7 @@ export function MusicPlayer() {
                   onClick={playPrevious}
                   className="hover:bg-primary/10"
                 >
-                  <SkipBack className="w-5 h-5" />
+                  <SkipForward className="w-5 h-5" />
                 </Button>
                 <Button
                   size="icon"
@@ -450,7 +450,7 @@ export function MusicPlayer() {
                   onClick={playNext}
                   className="hover:bg-primary/10"
                 >
-                  <SkipForward className="w-5 h-5" />
+                  <SkipBack className="w-5 h-5" />
                 </Button>
               </div>
 

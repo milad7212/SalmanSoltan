@@ -1,199 +1,204 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { Play, Pause, Music2, Instagram, Youtube, Twitter, Globe, ChevronDown, ChevronUp, Search, SkipBack, SkipForward } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useState, useRef, useEffect } from "react";
+import {
+  Play,
+  Pause,
+  Music2,
+  Instagram,
+  Youtube,
+  Twitter,
+  Globe,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  SkipBack,
+  SkipForward,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // داده‌های آهنگ‌ها
 const songs = [
   {
     id: 1,
-    title: 'عاشقانه',
-    duration: '3:45',
-    category: 'عاشقانه',
-    coverImage: '/romantic-music-cover.jpg',
-    audioUrl: '/audio/song1.mp3',
-    lyrics: `دلم برای تو می‌تپد هر شب و روز
-تو باعث شادی من هستی امروز
-با تو زندگی من رنگین است و زیباست
-عشق تو در دلم جاودان و پایداست`,
+    title: "نترس",
+    duration: "2:53",
+    category: "عاشقانه",
+    coverImage: "/Natars.jpg",
+    audioUrl: "/audio/Natars.mp3",
+    lyrics: `نترس عزیزم`,
   },
   {
     id: 2,
-    title: 'رویای شب',
-    duration: '4:20',
-    category: 'آرام',
-    coverImage: '/night-dream-music-cover.jpg',
-    audioUrl: '/audio/song2.mp3',
-    lyrics: `در شب تاریک تو ستاره منی
-نور امید و آرامش برای من
-رویای شیرین تو همراه منه
-تا ابد در قلبم جای داری`,
+    title: "حصار",
+    duration: "1:10",
+    category: "آرام",
+    coverImage: "/Hesar.jpg",
+    audioUrl: "/audio/Hesar.mp3",
+    lyrics: `حصار دور تو هست`,
   },
   {
     id: 3,
-    title: 'خاطرات',
-    duration: '3:30',
-    category: 'غمگین',
-    coverImage: '/memories-music-cover.jpg',
-    audioUrl: '/audio/song3.mp3',
-    lyrics: `یادت می‌آید آن روزهای خوش
-وقتی که با هم بودیم سرخوش
-خاطرات شیرین ما همیشه پایدار
-در دل من تا ابد ماندگار`,
+    title: "موخام",
+    duration: "3:35",
+    category: "غمگین",
+    coverImage: "/Mokham.jpg",
+    audioUrl: "/audio/Mokahm.mp3",
+    lyrics: `موخام..`,
   },
   {
     id: 4,
-    title: 'بی‌تو',
-    duration: '4:05',
-    category: 'غمگین',
-    coverImage: '/emotional-music-cover.jpg',
-    audioUrl: '/audio/song4.mp3',
-    lyrics: `بی تو زندگی من بی معنی است
-هر لحظه دوری سخت و طاقت فرساست
-برگرد که دلم برایت تنگ شده
-روزهای من بدون تو سخت شده`,
+    title: "پوست شیر",
+    duration: "2:32",
+    category: "غمگین",
+    coverImage: "/PoostShir.jpg",
+    audioUrl: "/audio/PoostShir.mp3",
+    lyrics: `پوست شیر`,
   },
-  {
-    id: 5,
-    title: 'آرامش',
-    duration: '5:10',
-    category: 'آرام',
-    coverImage: '/calm-peaceful-music-cover.jpg',
-    audioUrl: '/audio/song5.mp3',
-    lyrics: `در آغوش تو آرامش می‌یابم من
-دنیای من با تو زیباست همیشه
-لحظه‌های کنار تو طلایی است
-عشق تو برای من همه چیز است`,
-  },
-  {
-    id: 6,
-    title: 'انرژی',
-    duration: '3:15',
-    category: 'شاد',
-    coverImage: '/energetic-music-cover.jpg',
-    audioUrl: '/audio/song6.mp3',
-    lyrics: `با تو انرژی می‌گیرم هر روز
-زندگی با تو پر از شور و شعف است
-دستت را بگیر و با من بیا
-بریم به سمت آینده‌ای روشن`,
-  },
-]
+  //   ,
 
-const categories = ['همه', 'عاشقانه', 'آرام', 'غمگین', 'شاد']
+  //   {
+  //     id: 5,
+  //     title: "آرامش",
+  //     duration: "5:10",
+  //     category: "آرام",
+  //     coverImage: "/calm-peaceful-music-cover.jpg",
+  //     audioUrl: "/audio/song5.mp3",
+  //     lyrics: `در آغوش تو آرامش می‌یابم من
+  // دنیای من با تو زیباست همیشه
+  // لحظه‌های کنار تو طلایی است
+  // عشق تو برای من همه چیز است`,
+  //   },
+  //   {
+  //     id: 6,
+  //     title: "انرژی",
+  //     duration: "3:15",
+  //     category: "شاد",
+  //     coverImage: "/energetic-music-cover.jpg",
+  //     audioUrl: "/audio/song6.mp3",
+  //     lyrics: `با تو انرژی می‌گیرم هر روز
+  // زندگی با تو پر از شور و شعف است
+  // دستت را بگیر و با من بیا
+  // بریم به سمت آینده‌ای روشن`,
+  //   },
+];
+
+const categories = ["همه", "عاشقانه", "آرام", "غمگین", "شاد"];
 
 export function MusicPlayer() {
-  const [currentSong, setCurrentSong] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [playCount, setPlayCount] = useState<Record<number, number>>({})
-  const [expandedLyrics, setExpandedLyrics] = useState<number | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('همه')
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [showPlayerLyrics, setShowPlayerLyrics] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
-
+  const [currentSong, setCurrentSong] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playCount, setPlayCount] = useState<Record<number, number>>({});
+  const [expandedLyrics, setExpandedLyrics] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("همه");
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showPlayerLyrics, setShowPlayerLyrics] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const filteredSongs = songs.filter((song) => {
-    const matchesSearch = song.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'همه' || song.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+    const matchesSearch = song.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "همه" || song.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const playNext = () => {
-    const nextIndex = (currentSong + 1) % songs.length
-    setCurrentSong(nextIndex)
+    const nextIndex = (currentSong + 1) % songs.length;
+    setCurrentSong(nextIndex);
     setPlayCount((prev) => ({
       ...prev,
       [songs[nextIndex].id]: (prev[songs[nextIndex].id] || 0) + 1,
-    }))
-    setIsPlaying(true)
-  }
+    }));
+    setIsPlaying(true);
+  };
 
   const playPrevious = () => {
-    const prevIndex = currentSong === 0 ? songs.length - 1 : currentSong - 1
-    setCurrentSong(prevIndex)
+    const prevIndex = currentSong === 0 ? songs.length - 1 : currentSong - 1;
+    setCurrentSong(prevIndex);
     setPlayCount((prev) => ({
       ...prev,
       [songs[prevIndex].id]: (prev[songs[prevIndex].id] || 0) + 1,
-    }))
-    setIsPlaying(true)
-  }
+    }));
+    setIsPlaying(true);
+  };
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime)
+      setCurrentTime(audioRef.current.currentTime);
     }
-  }
+  };
 
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
-      setDuration(audioRef.current.duration)
+      setDuration(audioRef.current.duration);
     }
-  }
+  };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (audioRef.current && duration) {
-      const rect = e.currentTarget.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const percentage = x / rect.width
-      const newTime = percentage * duration
-      audioRef.current.currentTime = newTime
-      setCurrentTime(newTime)
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = x / rect.width;
+      const newTime = percentage * duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
-  }
+  };
 
   const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60)
-    const seconds = Math.floor(time % 60)
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
-  }
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   useEffect(() => {
-    const savedCounts = localStorage.getItem('playCount')
+    const savedCounts = localStorage.getItem("playCount");
     if (savedCounts) {
-      setPlayCount(JSON.parse(savedCounts))
+      setPlayCount(JSON.parse(savedCounts));
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('playCount', JSON.stringify(playCount))
-  }, [playCount])
+    localStorage.setItem("playCount", JSON.stringify(playCount));
+  }, [playCount]);
 
   const togglePlay = (songIndex: number) => {
     if (currentSong === songIndex && isPlaying) {
-      audioRef.current?.pause()
-      setIsPlaying(false)
+      audioRef.current?.pause();
+      setIsPlaying(false);
     } else {
       if (currentSong !== songIndex) {
-        setCurrentSong(songIndex)
+        setCurrentSong(songIndex);
         setPlayCount((prev) => ({
           ...prev,
           [songs[songIndex].id]: (prev[songs[songIndex].id] || 0) + 1,
-        }))
+        }));
       }
-      setIsPlaying(true)
+      setIsPlaying(true);
       setTimeout(() => {
-        audioRef.current?.play()
-      }, 100)
+        audioRef.current?.play();
+      }, 100);
     }
-  }
+  };
 
   const toggleLyrics = (songId: number) => {
-    setExpandedLyrics(expandedLyrics === songId ? null : songId)
-  }
+    setExpandedLyrics(expandedLyrics === songId ? null : songId);
+  };
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.src = songs[currentSong].audioUrl
+      audioRef.current.src = songs[currentSong].audioUrl;
       if (isPlaying) {
-        audioRef.current.play()
+        audioRef.current.play();
       }
     }
-  }, [currentSong])
+  }, [currentSong]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -206,8 +211,12 @@ export function MusicPlayer() {
                 <Music2 className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">سلمان سلطان</h1>
-                <p className="text-sm text-muted-foreground">خواننده و آهنگساز</p>
+                <h1 className="text-2xl font-bold text-foreground">
+                  سلمان سلطان
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  خواننده و آهنگساز
+                </p>
               </div>
             </div>
           </div>
@@ -228,7 +237,7 @@ export function MusicPlayer() {
                 className="relative w-full h-full rounded-full object-cover border-4 border-primary/30 shadow-2xl backdrop-blur-sm"
               />
             </div>
-            
+
             <h2 className="text-5xl md:text-7xl font-bold mb-6 text-balance">
               سلمان سلطان
             </h2>
@@ -258,7 +267,7 @@ export function MusicPlayer() {
             {categories.map((category) => (
               <Button
                 key={category}
-                variant={selectedCategory === category ? 'default' : 'outline'}
+                variant={selectedCategory === category ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category)}
                 className="text-base px-6"
               >
@@ -272,13 +281,13 @@ export function MusicPlayer() {
       {/* Songs Grid */}
       <section className="container mx-auto px-4 py-12">
         <h3 className="text-3xl font-bold mb-8 text-foreground">
-          {searchQuery || selectedCategory !== 'همه'
+          {searchQuery || selectedCategory !== "همه"
             ? `نتایج (${filteredSongs.length})`
-            : 'تمام آهنگ‌ها'}
+            : "تمام آهنگ‌ها"}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSongs.map((song, index) => {
-            const originalIndex = songs.findIndex((s) => s.id === song.id)
+            const originalIndex = songs.findIndex((s) => s.id === song.id);
             return (
               <Card
                 key={song.id}
@@ -291,7 +300,7 @@ export function MusicPlayer() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                  
+
                   {currentSong === originalIndex && isPlaying && (
                     <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm font-medium text-primary-foreground animate-pulse">
                       در حال پخش
@@ -315,7 +324,9 @@ export function MusicPlayer() {
 
                   {/* Play Count Badge */}
                   <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
-                    <span className="text-primary">{playCount[song.id] || 0}</span>
+                    <span className="text-primary">
+                      {playCount[song.id] || 0}
+                    </span>
                     <span className="text-muted-foreground mr-1">پخش</span>
                   </div>
                 </div>
@@ -330,9 +341,11 @@ export function MusicPlayer() {
                         {song.category}
                       </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{song.duration}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {song.duration}
+                    </span>
                   </div>
-                  
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -364,7 +377,7 @@ export function MusicPlayer() {
                         <ChevronDown className="w-5 h-5" />
                       )}
                     </button>
-                    
+
                     {expandedLyrics === song.id && (
                       <div className="mt-4 text-base leading-8 text-foreground/80 whitespace-pre-line animate-in fade-in duration-300 p-4 bg-secondary/30 rounded-lg">
                         {song.lyrics}
@@ -373,15 +386,19 @@ export function MusicPlayer() {
                   </div>
                 </div>
               </Card>
-            )
+            );
           })}
         </div>
 
         {filteredSongs.length === 0 && (
           <div className="text-center py-20">
             <Music2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">آهنگی یافت نشد</h3>
-            <p className="text-muted-foreground">لطفاً فیلتر یا جستجوی خود را تغییر دهید</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              آهنگی یافت نشد
+            </h3>
+            <p className="text-muted-foreground">
+              لطفاً فیلتر یا جستجوی خود را تغییر دهید
+            </p>
           </div>
         )}
       </section>
@@ -400,7 +417,9 @@ export function MusicPlayer() {
 
               {/* Song Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-foreground truncate">{songs[currentSong].title}</h4>
+                <h4 className="font-semibold text-foreground truncate">
+                  {songs[currentSong].title}
+                </h4>
                 <p className="text-sm text-muted-foreground">سلمان سلطان</p>
               </div>
 
@@ -446,7 +465,11 @@ export function MusicPlayer() {
                 >
                   <div
                     className="h-full bg-primary rounded-full transition-all group-hover:bg-primary/90 relative"
-                    style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                    style={{
+                      width: `${
+                        duration ? (currentTime / duration) * 100 : 0
+                      }%`,
+                    }}
                   >
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -486,7 +509,9 @@ export function MusicPlayer() {
               >
                 <div
                   className="h-full bg-primary rounded-full transition-all"
-                  style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                  style={{
+                    width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                  }}
                 />
               </div>
             </div>
@@ -494,7 +519,9 @@ export function MusicPlayer() {
             {/* Lyrics Section in Player */}
             {showPlayerLyrics && (
               <div className="mt-4 pt-4 border-t border-border/40 animate-in fade-in slide-in-from-bottom duration-300">
-                <h5 className="text-sm font-semibold text-foreground mb-3">متن آهنگ: {songs[currentSong].title}</h5>
+                <h5 className="text-sm font-semibold text-foreground mb-3">
+                  متن آهنگ: {songs[currentSong].title}
+                </h5>
                 <div className="text-base leading-8 text-foreground/90 whitespace-pre-line p-4 bg-secondary/30 rounded-lg max-h-40 overflow-y-auto">
                   {songs[currentSong].lyrics}
                 </div>
@@ -510,7 +537,9 @@ export function MusicPlayer() {
           <div className="flex flex-col items-center gap-8">
             {/* Social Media Links */}
             <div className="flex flex-col items-center gap-4">
-              <h4 className="text-lg font-semibold text-foreground">مرا دنبال کنید</h4>
+              <h4 className="text-lg font-semibold text-foreground">
+                مرا دنبال کنید
+              </h4>
               <div className="flex items-center gap-4">
                 <a
                   href="https://instagram.com"
@@ -558,12 +587,12 @@ export function MusicPlayer() {
       <audio
         ref={audioRef}
         onEnded={() => {
-          setIsPlaying(false)
-          playNext()
+          setIsPlaying(false);
+          playNext();
         }}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
       />
     </div>
-  )
+  );
 }

@@ -29,16 +29,26 @@ const songs = [
     coverImage: "/Natars.jpg",
     audioUrl: "/audio/Natars.mp3",
     lyrics: `نترس عزیزم`,
+    timedLyrics: [
+      { time: 0, text: ""},
+      { time: 12, text: "نترس بذار بمونه خاطره" },
+      { time: 17, text: "اون عشقی که تو قلب تو نمونه باطله" },
+      { time: 20, text: "دوباره بی خبر، گذاشت و رفت بهم نگفت" },
+      { time:23 , text: "دلت گرفته نگاه کن به ماه که کامله" },
+      { time: 26, text: "    " },
+      { time: 29, text: "    " },
+      { time: 32, text: "    " },
+      { time: 35, text: "    " },
+      { time: 38, text: "    " },
+      { time: 41, text: "    " },
+      { time: 44, text: "    " },
+      { time: 47, text: "    " },
+      { time: 50, text: "    " },
+      { time: 53, text: "    " },
+    
+    ],
   },
-  {
-    id: 2,
-    title: "حصار",
-    duration: "1:10",
-    category: "آرام",
-    coverImage: "/Hesar.jpg",
-    audioUrl: "/audio/Hesar.mp3",
-    lyrics: `حصار دور تو هست`,
-  },
+  
   {
     id: 3,
     title: "محکم",
@@ -47,6 +57,13 @@ const songs = [
     coverImage: "/Mohkam.jpg",
     audioUrl: "/audio/Mohkam.mp3",
     lyrics: `محکم..`,
+    timedLyrics: [
+      { time: 0, text: "محکم بگیر دستامو" },
+      { time: 20, text: "وقتی که بارون می‌باره" },
+      { time: 42, text: "دنیای من با تو قرصه" },
+      { time: 64, text: "حتی اگه شب تکراره" },
+      { time: 86, text: "محکم کنارم بمون" },
+    ],
   },
   {
     id: 4,
@@ -56,6 +73,13 @@ const songs = [
     coverImage: "/PoostShir.jpg",
     audioUrl: "/audio/PoostShir.mp3",
     lyrics: `پوست شیر`,
+    timedLyrics: [
+      { time: 0, text: "پوست شیر تنمه" },
+      { time: 16, text: "روحم اما خستست" },
+      { time: 34, text: "جنگیدم واسه تو" },
+      { time: 54, text: "هر چی بود دست‌کم نیست" },
+      { time: 72, text: "بازم کنارتم" },
+    ],
   },
   //   ,
 
@@ -97,7 +121,54 @@ export function MusicPlayer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showPlayerLyrics, setShowPlayerLyrics] = useState(false);
+  const [activeLyricIndex, setActiveLyricIndex] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lyricsContainerRef = useRef<HTMLDivElement>(null);
+  const activeLyricRef = useRef<HTMLDivElement>(null);
+
+  // Lock scroll when lyrics overlay is open (desktop & mobile)
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const { body, documentElement } = document;
+    if (showPlayerLyrics) {
+      body.classList.add("overflow-hidden");
+      documentElement.classList.add("overflow-hidden");
+    } else {
+      body.classList.remove("overflow-hidden");
+      documentElement.classList.remove("overflow-hidden");
+    }
+    return () => {
+      body.classList.remove("overflow-hidden");
+      documentElement.classList.remove("overflow-hidden");
+    };
+  }, [showPlayerLyrics]);
+
+  // Auto-scroll to active lyric line
+  useEffect(() => {
+    if (
+      showPlayerLyrics &&
+      activeLyricRef.current &&
+      lyricsContainerRef.current
+    ) {
+      const container = lyricsContainerRef.current;
+      const activeElement = activeLyricRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = activeElement.getBoundingClientRect();
+
+      const scrollTop = container.scrollTop;
+      const elementTop = elementRect.top - containerRect.top + scrollTop;
+      const elementHeight = elementRect.height;
+      const containerHeight = containerRect.height;
+
+      // Scroll to center the active line
+      const targetScroll = elementTop - containerHeight / 2 + elementHeight / 2;
+
+      container.scrollTo({
+        top: targetScroll,
+        behavior: "smooth",
+      });
+    }
+  }, [activeLyricIndex, showPlayerLyrics]);
 
   const filteredSongs = songs.filter((song) => {
     const matchesSearch = song.title
@@ -128,15 +199,36 @@ export function MusicPlayer() {
     setIsPlaying(true);
   };
 
+  const updateActiveLyric = (time: number, songIndex = currentSong) => {
+    const timeline = songs[songIndex].timedLyrics;
+    if (!timeline || timeline.length === 0) {
+      setActiveLyricIndex(null);
+      return;
+    }
+
+    let foundIndex: number | null = null;
+    for (let i = 0; i < timeline.length; i++) {
+      if (time >= timeline[i].time) {
+        foundIndex = i;
+      } else {
+        break;
+      }
+    }
+    setActiveLyricIndex(foundIndex);
+  };
+
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      const time = audioRef.current.currentTime;
+      setCurrentTime(time);
+      updateActiveLyric(time);
     }
   };
 
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      updateActiveLyric(0);
     }
   };
 
@@ -148,6 +240,7 @@ export function MusicPlayer() {
       const newTime = percentage * duration;
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
+      updateActiveLyric(newTime);
     }
   };
 
@@ -179,6 +272,7 @@ export function MusicPlayer() {
           ...prev,
           [songs[songIndex].id]: (prev[songs[songIndex].id] || 0) + 1,
         }));
+        setActiveLyricIndex(null);
       }
       setIsPlaying(true);
       setTimeout(() => {
@@ -197,6 +291,7 @@ export function MusicPlayer() {
       if (isPlaying) {
         audioRef.current.play();
       }
+      setActiveLyricIndex(null);
     }
   }, [currentSong]);
 
@@ -225,7 +320,7 @@ export function MusicPlayer() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 px-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-primary/10 to-transparent" />
         <div className="container mx-auto relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             {/* Artist Image with Blur Effect */}
@@ -299,7 +394,7 @@ export function MusicPlayer() {
                     alt={song.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent" />
 
                   {currentSong === originalIndex && isPlaying && (
                     <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-sm font-medium text-primary-foreground animate-pulse">
@@ -379,8 +474,26 @@ export function MusicPlayer() {
                     </button>
 
                     {expandedLyrics === song.id && (
-                      <div className="mt-4 text-base leading-8 text-foreground/80 whitespace-pre-line animate-in fade-in duration-300 p-4 bg-secondary/30 rounded-lg">
-                        {song.lyrics}
+                      <div className="mt-4 space-y-2 animate-in fade-in duration-300 p-4 bg-linear-to-b from-background/80 via-secondary/40 to-background/70 rounded-xl border border-border/50">
+                        {song.timedLyrics && song.timedLyrics.length > 0 ? (
+                          song.timedLyrics.map((line) => (
+                            <div
+                              key={`${song.id}-${line.time}-${line.text}`}
+                              className="flex items-start gap-3 text-base leading-8 text-foreground/80"
+                            >
+                              <span className="text-xs text-primary/70 mt-1">
+                                {formatTime(line.time)}
+                              </span>
+                              <span className="whitespace-pre-line text-foreground/70">
+                                {line.text}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-base leading-8 text-foreground/80 whitespace-pre-line">
+                            {song.lyrics}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -403,8 +516,8 @@ export function MusicPlayer() {
         )}
       </section>
 
-      {/* Bottom Player */}
-      {isPlaying && (
+      {/* Bottom Player - همیشه نمایش داده می‌شود (فقط وقتی لایه شعر باز است پنهان می‌شود) */}
+      {!showPlayerLyrics && (
         <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-lg border-t border-border/40 z-50 animate-in slide-in-from-bottom duration-300">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
@@ -515,18 +628,123 @@ export function MusicPlayer() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Lyrics Section in Player */}
-            {showPlayerLyrics && (
-              <div className="mt-4 pt-4 border-t border-border/40 animate-in fade-in slide-in-from-bottom duration-300">
-                <h5 className="text-sm font-semibold text-foreground mb-3">
+      {/* Full-screen lyrics overlay - خارج از پلیر پایین */}
+      {showPlayerLyrics && (
+        <div className="fixed inset-0 z-9999 w-screen h-screen bg-background/95 backdrop-blur-lg overflow-hidden animate-in fade-in duration-300">
+          <div className="w-full max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 h-full flex flex-col overflow-hidden">
+            {/* Header - Sticky */}
+            <div className="flex items-center justify-between gap-3 py-4 px-2 bg-background/95 backdrop-blur-lg border-b border-border/40 z-10 shrink-0">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground animate-in fade-in slide-in-from-top-2 duration-500">
+                  {isPlaying ? "در حال پخش" : "متوقف شده"}
+                </p>
+                <h5 className="text-xl md:text-2xl font-bold text-foreground animate-in fade-in slide-in-from-top-2 duration-500 delay-100 truncate">
                   متن آهنگ: {songs[currentSong].title}
                 </h5>
-                <div className="text-base leading-8 text-foreground/90 whitespace-pre-line p-4 bg-secondary/30 rounded-lg max-h-40 overflow-y-auto">
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPlayerLyrics(false)}
+                className="border-border/60 hover:border-primary transition-all duration-300 hover:scale-105 shrink-0"
+              >
+                بستن
+              </Button>
+            </div>
+
+            {/* Lyrics Container - با overflow-x-hidden */}
+            <div
+              ref={lyricsContainerRef}
+              className="space-y-3 md:space-y-4 overflow-y-auto overflow-x-hidden flex-1 scroll-smooth px-2"
+            >
+              {songs[currentSong].timedLyrics &&
+              songs[currentSong].timedLyrics.length > 0 ? (
+                songs[currentSong].timedLyrics.map((line, idx) => {
+                  const isActive = idx === activeLyricIndex;
+                  const distance =
+                    activeLyricIndex === null
+                      ? null
+                      : Math.abs(idx - activeLyricIndex);
+                  const opacityClass =
+                    distance === null
+                      ? "opacity-60"
+                      : distance === 0
+                      ? "opacity-100"
+                      : distance === 1
+                      ? "opacity-70"
+                      : distance === 2
+                      ? "opacity-50"
+                      : "opacity-30";
+
+                  const scaleClass = isActive ? "scale-[1.02]" : "scale-100";
+                  const glowClass = isActive
+                    ? "shadow-2xl shadow-primary/20"
+                    : "";
+
+                  return (
+                    <div
+                      ref={isActive ? activeLyricRef : null}
+                      key={`${songs[currentSong].id}-overlay-${line.time}`}
+                      className={`relative rounded-2xl px-4 md:px-6 py-4 md:py-5 transition-all duration-500 ease-out border w-full max-w-full overflow-hidden ${opacityClass} ${scaleClass} ${glowClass} ${
+                        isActive
+                          ? "bg-linear-to-r from-primary/20 via-primary/15 to-primary/10 text-foreground border-primary/50 shadow-xl shadow-primary/10"
+                          : "bg-secondary/20 text-muted-foreground border-transparent hover:bg-secondary/30 hover:border-border/40 hover:opacity-80"
+                      } animate-in fade-in slide-in-from-bottom-4 duration-700`}
+                      style={{
+                        animationDelay: `${idx * 50}ms`,
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                      }}
+                    >
+                      <div className="flex items-center gap-2 md:gap-3 text-xs font-mono mb-2 min-w-0">
+                        <span
+                          className={`transition-all duration-300 shrink-0 ${
+                            isActive
+                              ? "text-primary font-bold scale-110"
+                              : "text-primary/60"
+                          }`}
+                        >
+                          {formatTime(line.time)}
+                        </span>
+                        {isActive && (
+                          <span className="h-0.5 flex-1 min-w-0 bg-linear-to-r from-primary/60 via-primary to-primary/60 animate-pulse rounded-full" />
+                        )}
+                      </div>
+                      <div
+                        className={`leading-7 md:leading-9 text-base md:text-lg font-medium transition-all duration-500 wrap-break-word overflow-wrap-anywhere hyphens-auto ${
+                          isActive ? "text-foreground" : "text-foreground/70"
+                        }`}
+                        style={{
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {line.text}
+                      </div>
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-2xl bg-primary/5 animate-pulse pointer-events-none -z-10" />
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <div
+                  className="text-base md:text-lg leading-7 md:leading-9 text-foreground/90 p-4 md:p-5 bg-secondary/30 rounded-2xl border border-border/40 animate-in fade-in slide-in-from-bottom-4 duration-500 wrap-break-word overflow-wrap-anywhere w-full max-w-full overflow-hidden"
+                  style={{
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
                   {songs[currentSong].lyrics}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
